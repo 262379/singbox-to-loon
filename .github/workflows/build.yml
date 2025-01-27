@@ -1,0 +1,36 @@
+name: Build Loon Rules Daily
+
+on:
+  schedule:
+    # 使用 Cron 表达式每天 00:00 UTC 自动触发
+    - cron: '0 0 * * *'
+
+  workflow_dispatch: # 手动触发（可选）
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: pip install --upgrade pip
+
+      - name: Convert Singbox to Loon
+        run: |
+          python singbox_to_loon.py
+
+      - name: Commit and push changes
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add loon_rules.conf
+          git commit -m "Update loon_rules.conf [Daily Build]"
+          git push
